@@ -81,4 +81,5 @@ When helping:
 - Overengineering early features.
 - Presenting speculative features as already implemented.
 - Taking away the learning opportunity by defaulting to full solutions.
+- Keep responses short and concise
 
