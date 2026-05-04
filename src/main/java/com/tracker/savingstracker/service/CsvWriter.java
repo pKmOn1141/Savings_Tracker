@@ -7,19 +7,24 @@ import com.tracker.savingstracker.model.Account;
 import com.tracker.savingstracker.model.BalanceEntry;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
+@Slf4j
 @Service
-public class CsvReader {
+public class CsvWriter {
 
     @Value("${app.csv.directory}")
     private String path;
 
-    public CsvReader() {
+    public CsvWriter() {
     }
 
     // Write account info to csv
@@ -28,6 +33,7 @@ public class CsvReader {
             StatefulBeanToCsv<Account> beanToCsv = new StatefulBeanToCsvBuilder<Account>(writer).build();
 
             beanToCsv.write(account);
+            log.info("Written account");
         }
     }
 
@@ -47,25 +53,34 @@ public class CsvReader {
                         String.valueOf(entry.accountBalance()),
                         String.valueOf(entry.poundChange()),
                         String.valueOf(entry.percentChange())
-
                 });
+                log.info("Written entries");
             }
         }
     }
 
     // Generates the path string for the csv file
     private String pathGen(String account, String type) throws IOException {
-        return new StringBuilder()
+        log.info("Generating path for account {}", account);
+        String fullPath = new StringBuilder()
                 .append(path)
                 .append(File.separator)
                 .append(account)
                 .append(File.separator)
                 .append(type)
                 .toString();
+
+        log.info("Generated directory {}", fullPath);
+        Path directoryPath = Paths.get(fullPath).getParent();
+        Files.createDirectories(directoryPath);
+
+        return fullPath;
     }
 
     public void writeEntireAcc(Account account) throws Exception {
+        log.info("Writing account");
         writeAccountInfo(account);
         writeAccountEntries(account);
+        log.info("Account written");
     }
 }
