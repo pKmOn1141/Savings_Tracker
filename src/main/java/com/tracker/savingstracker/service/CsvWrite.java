@@ -33,7 +33,7 @@ public class CsvWriter {
             StatefulBeanToCsv<Account> beanToCsv = new StatefulBeanToCsvBuilder<Account>(writer).build();
 
             beanToCsv.write(account);
-            log.info("Written account");
+            log.info("Written {} account info", account.getName());
         }
     }
 
@@ -54,7 +54,7 @@ public class CsvWriter {
                         String.valueOf(entry.poundChange()),
                         String.valueOf(entry.percentChange())
                 });
-                log.info("Written entries");
+                log.info("Written {} entries into {}", account.getEntries().length, account.getName());
             }
         }
     }
@@ -78,9 +78,8 @@ public class CsvWriter {
     }
 
     public void writeEntireAcc(Account account) throws Exception {
-        log.info("Writing account");
         writeAccountInfo(account);
         writeAccountEntries(account);
-        log.info("Account written");
+        log.info("Completed writing account {}", account.getName());
     }
 }
