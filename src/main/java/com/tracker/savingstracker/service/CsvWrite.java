@@ -19,17 +19,19 @@ import java.nio.file.Paths;
 
 @Slf4j
 @Service
-public class CsvWriter {
+public class CsvWrite {
 
     @Value("${app.csv.directory}")
     private String path;
+    private final CsvPathGen pathGen;
 
-    public CsvWriter() {
+    public CsvWrite(CsvPathGen pathGen) {
+        this.pathGen = pathGen;
     }
 
     // Write account info to csv
     private void writeAccountInfo(Account account) throws Exception {
-        try (Writer writer = new FileWriter(pathGen(account.getName(), "accountInfo.csv"))) {
+        try (Writer writer = new FileWriter(pathGen.pathGen(account.getName(), "accountInfo.csv"))) {
             StatefulBeanToCsv<Account> beanToCsv = new StatefulBeanToCsvBuilder<Account>(writer).build();
 
             beanToCsv.write(account);
@@ -41,7 +43,7 @@ public class CsvWriter {
     private void writeAccountEntries(Account account) throws IOException {
         BalanceEntry[] entries = account.getEntries();
 
-        try (CSVWriter writer = new CSVWriter(new FileWriter(pathGen(account.getName(), "entries.csv")))) {
+        try (CSVWriter writer = new CSVWriter(new FileWriter(pathGen.pathGen(account.getName(), "entries.csv")))) {
             writer.writeNext(new String[]{
                     "date", "depositAmount", "accountBalance", "poundChange", "percentChange"
             });
@@ -57,24 +59,6 @@ public class CsvWriter {
                 log.info("Written {} entries into {}", account.getEntries().length, account.getName());
             }
         }
-    }
-
-    // Generates the path string for the csv file
-    private String pathGen(String account, String type) throws IOException {
-        log.info("Generating path for account {}", account);
-        String fullPath = new StringBuilder()
-                .append(path)
-                .append(File.separator)
-                .append(account)
-                .append(File.separator)
-                .append(type)
-                .toString();
-
-        log.info("Generated directory {}", fullPath);
-        Path directoryPath = Paths.get(fullPath).getParent();
-        Files.createDirectories(directoryPath);
-
-        return fullPath;
     }
 
     public void writeEntireAcc(Account account) throws Exception {

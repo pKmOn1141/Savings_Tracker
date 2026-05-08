@@ -22,7 +22,7 @@ public class HomeController {
         return "index";
     }
 
-    @PostMapping("/accounts")
+    @PostMapping("/new_accounts")
     public String createAccount(
             @RequestParam int id,
             @RequestParam String name,
@@ -31,6 +31,17 @@ public class HomeController {
             @RequestParam double totDeposit
     ) {
         accountStore.createAccount(id, name, totBalance, totProfit, totDeposit);
+        return "redirect:/";
+    }
+
+    @PostMapping("new_entry")
+    public String createEntry(
+            @RequestParam String date,
+            @RequestParam double depositAmount,
+            @RequestParam double accountBalance,
+            @RequestParam double poundChange,
+            @RequestParam double percentChange
+    ) {
         return "redirect:/";
     }
 }

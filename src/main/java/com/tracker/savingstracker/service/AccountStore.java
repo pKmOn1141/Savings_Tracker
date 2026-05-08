@@ -1,24 +1,21 @@
 package com.tracker.savingstracker.service;
 
 import com.tracker.savingstracker.model.Account;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 
 @Component
 public class AccountStore {
+    @Setter
+    @Getter
     private ArrayList<Account> accounts = new ArrayList<>();
-    private final CsvWriter csvWriter;
+    private final CsvWrite csvWrite;
 
-    public AccountStore(CsvWriter csvWriter) {
-        this.csvWriter = csvWriter;
-    }
-
-    public ArrayList<Account> getAccounts() {
-        return accounts;
-    }
-    public void setAccounts(ArrayList<Account> accounts) {
-        this.accounts = accounts;
+    public AccountStore(CsvWrite csvWrite) {
+        this.csvWrite = csvWrite;
     }
 
     // New account
@@ -26,11 +23,12 @@ public class AccountStore {
         try {
             Account account = new Account(id, name, totBalance, totProfit, totDeposit);
             accounts.add(account);
-            csvWriter.writeEntireAcc(account);
+            csvWrite.writeEntireAcc(account);
 
             return true;
         } catch(Exception e) {
             return false;
         }
     }
+
 }
