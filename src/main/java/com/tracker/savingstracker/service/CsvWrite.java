@@ -9,13 +9,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.util.ArrayList;
 
 @Slf4j
 @Service
@@ -41,7 +38,7 @@ public class CsvWrite {
 
     // Write account entries to csv
     private void writeAccountEntries(Account account) throws IOException {
-        BalanceEntry[] entries = account.getEntries();
+        ArrayList<BalanceEntry> entries = account.getEntries();
 
         try (CSVWriter writer = new CSVWriter(new FileWriter(pathGen.pathGen(account.getName(), "entries.csv")))) {
             writer.writeNext(new String[]{
@@ -50,17 +47,18 @@ public class CsvWrite {
 
             for (BalanceEntry entry : entries) {
                 writer.writeNext(new String[]{
+                        String.valueOf(entry.id()),
                         entry.date(),
                         String.valueOf(entry.depositAmount()),
                         String.valueOf(entry.accountBalance()),
                         String.valueOf(entry.poundChange()),
                         String.valueOf(entry.percentChange())
                 });
-                log.info("Written {} entries into {}", account.getEntries().length, account.getName());
             }
         }
     }
 
+    // Save all account data to csv
     public void writeEntireAcc(Account account) throws Exception {
         writeAccountInfo(account);
         writeAccountEntries(account);

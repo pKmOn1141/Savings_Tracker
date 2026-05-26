@@ -1,9 +1,18 @@
 package com.tracker.savingstracker.model;
 
 import com.opencsv.bean.CsvBindByName;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 
+import java.util.ArrayList;
+
+@Slf4j
 public class Account {
+    // Getters/Setters
     // Store in accountInfo csv
+    @Getter
+    @Setter
     @CsvBindByName
     private int id;
     @CsvBindByName
@@ -16,7 +25,9 @@ public class Account {
     private double totDeposit;
 
     // Store in entry csv
-    private BalanceEntry[] entries;
+    @Getter
+    @Setter
+    private ArrayList<BalanceEntry> entries = new ArrayList<BalanceEntry>();
 
     // CSV Constructor
     public Account() {
@@ -30,14 +41,6 @@ public class Account {
         this.totBalance = totBalance;
         this.totProfit = totProfit;
         this.totDeposit = totDeposit;
-    }
-
-    // Getters/Setters
-    public int getId() {
-        return id;
-    }
-    public void setId(int id) {
-        this.id = id;
     }
 
     public String getName() {
@@ -68,10 +71,14 @@ public class Account {
         this.totDeposit = totDeposit;
     }
 
-    public BalanceEntry[] getEntries() {
-        return entries;
-    }
-    public void setEntries(BalanceEntry[] entries) {
-        this.entries = entries;
+    // Add a new entry
+    public void addEntry(int id,
+                         String date,
+                         double depositAmount,
+                         double accountBalance,
+                         double poundChange,
+                         double percentChange) {
+        entries.add(new BalanceEntry(id, date, depositAmount, accountBalance, poundChange, percentChange));
+        log.info("Balance entry added to account {}", name);
     }
 }
