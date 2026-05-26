@@ -16,6 +16,8 @@ import java.util.Optional;
 @Controller
 public class HomeController {
 
+    // INITIALISING OBJECTS/VARIABLES
+
     private final AccountStore accountStore;
     private final CsvRead csvReader;
 
@@ -23,6 +25,8 @@ public class HomeController {
         this.accountStore = accountStore;
         this.csvReader = csvReader;
     }
+
+    // DISPLAY FUNCTIONS
 
     @GetMapping("/")
     public String home(Model model) throws Exception {
@@ -44,18 +48,18 @@ public class HomeController {
         return "index";
     }
 
+    // CREATE FUNCTIONS
+
+    // Create a new account
     @PostMapping("/new_account")
     public String createAccount(
-            @RequestParam int id,
-            @RequestParam String name,
-            @RequestParam double totBalance,
-            @RequestParam double totProfit,
-            @RequestParam double totDeposit
+            @RequestParam String name
     ) {
-        accountStore.createAccount(id, name, totBalance, totProfit, totDeposit);
+        accountStore.createAccount(name);
         return "redirect:/";
     }
 
+    // Create a new entry
     @PostMapping("/new_entry")
     public String createEntry(
             @RequestParam int id,

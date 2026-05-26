@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Optional;
 
 @Slf4j
@@ -22,8 +23,20 @@ public class AccountStore {
         this.csvWrite = csvWrite;
     }
 
+    // Sort by account ID
+    public void sortByID() {
+        accounts.sort(Comparator.comparingInt(Account::getId));
+        log.info("Sorted accounts by ID");
+    }
+
     // New account
-    public void createAccount(int id, String name, double totBalance, double totProfit, double totDeposit) {
+    public void createAccount(String name) {
+        // New account info
+        int id = accounts.size()+1;
+        double totBalance = 0.0;
+        double totProfit = 0.0;
+        double totDeposit = 0.0;
+
         try {
             Account account = new Account(id, name, totBalance, totProfit, totDeposit);
             accounts.add(account);

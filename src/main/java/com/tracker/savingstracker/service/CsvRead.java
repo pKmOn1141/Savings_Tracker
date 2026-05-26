@@ -30,6 +30,7 @@ public class CsvRead {
         this.accountStore = accountStore;
     }
 
+    // Run at the start of the application
     @PostConstruct
     public void init() throws Exception {
         readAccountsInfo();
@@ -63,7 +64,7 @@ public class CsvRead {
                                 } catch (Exception e) {
                                     throw new RuntimeException(e);
                                 }
-                                log.info("Loaded account {} from CSV", csvFile.getFileName());
+                                log.info("Loaded account {} from CSV", accountDir.getFileName().toString());
 
                             });
                 } catch (IOException e) {
@@ -71,6 +72,8 @@ public class CsvRead {
                 }
             });
         }
+
+        accountStore.sortByID();
     }
 
 }
