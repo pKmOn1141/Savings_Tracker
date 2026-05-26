@@ -6,6 +6,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 
 @Slf4j
 public class Account {
@@ -69,6 +70,40 @@ public class Account {
     }
     public void setTotDeposit(double totDeposit) {
         this.totDeposit = totDeposit;
+    }
+
+    public int entryCount() {
+        return entries.size();
+    }
+
+    // Sort by entry ID
+    public void sortEntryByID(boolean ascending) {
+        if (ascending) {
+            entries.sort(Comparator.comparingInt(BalanceEntry::id));
+        }
+        else {
+            entries.sort(Comparator.comparingInt(BalanceEntry::id).reversed());
+        }
+
+    }
+
+    // Create the complete entry
+    public void createEntry(String name, String date, double depAmount, double accBalance) {
+        int id = entryCount()+1;
+        double poundChange = 0.0;
+        double percChange = 0.0;
+
+        if (!entries.isEmpty()) {
+            // Get pound + percentage changes
+            sortEntryByID(true);
+            BalanceEntry lastEntry = entries.getLast();
+
+            poundChange = accBalance - lastEntry.accountBalance();
+            percChange = (accBalance - lastEntry.accountBalance())/lastEntry.accountBalance() * 100;
+            percChange = (double) Math.round(percChange * 100) /100; // Round to 2dp
+        }
+
+        addEntry(id, date, depAmount, accBalance, poundChange, percChange);
     }
 
     // Add a new entry

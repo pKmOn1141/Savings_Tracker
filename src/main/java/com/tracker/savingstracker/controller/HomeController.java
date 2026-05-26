@@ -28,18 +28,22 @@ public class HomeController {
 
     // DISPLAY FUNCTIONS
 
+    // Display main page
     @GetMapping("/")
     public String home(Model model) throws Exception {
+        log.info(" ");
         log.info("Refreshing home page");
         model.addAttribute("accounts", accountStore.getAccounts());
         return "index";
     }
 
+    // Display entries
     @GetMapping("/entries")
     public String viewEntries(@RequestParam String accountName, Model model) {
         Optional<Account> resultAcc = accountStore.findByName(accountName);
         if (resultAcc.isPresent()) {
             Account account = resultAcc.get();
+            account.sortEntryByID(false);
             log.info("Displaying {} account entries", accountName);
             model.addAttribute("entries", account.getEntries());
             model.addAttribute("selectedAccount", account.getName());
@@ -62,19 +66,15 @@ public class HomeController {
     // Create a new entry
     @PostMapping("/new_entry")
     public String createEntry(
-            @RequestParam int id,
             @RequestParam String name,
             @RequestParam String date,
             @RequestParam double depositAmount,
-            @RequestParam double accountBalance,
-            @RequestParam double poundChange,
-            @RequestParam double percentChange
+            @RequestParam double accountBalance
     ) {
         Optional<Account> searchResult = accountStore.findByName(name);
         if (searchResult.isPresent()) {
             Account targetAccount = searchResult.get();
-            targetAccount.addEntry(id, date, depositAmount, accountBalance, poundChange, percentChange);
-
+            targetAccount.createEntry(name, date, depositAmount, accountBalance);
         }
         else {
             log.warn("Account with name {} not found", name);
