@@ -103,6 +103,11 @@ public class Account {
             percChange = (double) Math.round(percChange * 100) /100; // Round to 2dp
         }
 
+        // Update other account information
+        this.totBalance = accBalance;
+        this.totProfit += poundChange - depAmount;
+        this.totDeposit += depAmount;
+
         addEntry(id, date, depAmount, accBalance, poundChange, percChange);
     }
 

@@ -24,8 +24,8 @@
             <td th:text="${account.id}"></td>
             <td th:text="${account.name}"></td>
             <td th:text="${account.totBalance}"></td>
-            <td th:text="${account.totProfit}"></td>
             <td th:text="${account.totDeposit}"></td>
+            <td th:text="${account.totProfit}"></td>
         </tr>
         <tr th:if="${#lists.isEmpty(accounts)}">
             <td colspan="5">No accounts yet.</td>

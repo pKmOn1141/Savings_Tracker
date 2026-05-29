@@ -2,7 +2,7 @@ package com.tracker.savingstracker.controller;
 
 import com.tracker.savingstracker.model.Account;
 import com.tracker.savingstracker.service.AccountStore;
-import com.tracker.savingstracker.service.CsvRead;
+import com.tracker.savingstracker.service.CsvDataWrite;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,11 +19,11 @@ public class HomeController {
     // INITIALISING OBJECTS/VARIABLES
 
     private final AccountStore accountStore;
-    private final CsvRead csvReader;
+    private final CsvDataWrite csvDataWrite;
 
-    public HomeController(AccountStore accountStore, CsvRead csvReader) {
+    public HomeController(AccountStore accountStore, CsvDataWrite csvDataWrite) {
         this.accountStore = accountStore;
-        this.csvReader = csvReader;
+        this.csvDataWrite = csvDataWrite;
     }
 
     // DISPLAY FUNCTIONS
@@ -74,7 +74,15 @@ public class HomeController {
         Optional<Account> searchResult = accountStore.findByName(name);
         if (searchResult.isPresent()) {
             Account targetAccount = searchResult.get();
+            // Create Entry
             targetAccount.createEntry(name, date, depositAmount, accountBalance);
+            // Rewrite account to csv
+            try {
+                csvDataWrite.writeEntireAcc(targetAccount);
+                log.info("New entry added to {}", targetAccount.getName());
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         }
         else {
             log.warn("Account with name {} not found", name);

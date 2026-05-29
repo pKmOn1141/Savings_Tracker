@@ -18,14 +18,14 @@ import java.util.stream.Stream;
 
 @Slf4j
 @Service
-public class CsvRead {
+public class CsvDataRead {
 
     @Value("${app.csv.directory}")
     private String path;
     private final CsvPathGen pathGen;
     private final AccountStore accountStore;
 
-    public CsvRead(CsvPathGen pathGen, AccountStore accountStore) {
+    public CsvDataRead(CsvPathGen pathGen, AccountStore accountStore) {
         this.pathGen = pathGen;
         this.accountStore = accountStore;
     }

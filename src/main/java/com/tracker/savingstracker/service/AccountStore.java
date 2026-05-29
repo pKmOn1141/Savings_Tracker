@@ -1,6 +1,5 @@
 package com.tracker.savingstracker.service;
 
-import com.opencsv.bean.CsvToBean;
 import com.tracker.savingstracker.model.Account;
 import lombok.Getter;
 import lombok.Setter;
@@ -17,10 +16,10 @@ public class AccountStore {
     @Setter
     @Getter
     private ArrayList<Account> accounts = new ArrayList<>();
-    private final CsvWrite csvWrite;
+    private final CsvDataWrite csvDataWrite;
 
-    public AccountStore(CsvWrite csvWrite) {
-        this.csvWrite = csvWrite;
+    public AccountStore(CsvDataWrite csvDataWrite) {
+        this.csvDataWrite = csvDataWrite;
     }
 
     // Sort by account ID
@@ -40,7 +39,7 @@ public class AccountStore {
         try {
             Account account = new Account(id, name, totBalance, totProfit, totDeposit);
             accounts.add(account);
-            csvWrite.writeEntireAcc(account);
+            csvDataWrite.writeEntireAcc(account);
 
         } catch(Exception _) {
         }

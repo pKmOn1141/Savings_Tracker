@@ -16,13 +16,13 @@ import java.util.ArrayList;
 
 @Slf4j
 @Service
-public class CsvWrite {
+public class CsvDataWrite {
 
     @Value("${app.csv.directory}")
     private String path;
     private final CsvPathGen pathGen;
 
-    public CsvWrite(CsvPathGen pathGen) {
+    public CsvDataWrite(CsvPathGen pathGen) {
         this.pathGen = pathGen;
     }
 
