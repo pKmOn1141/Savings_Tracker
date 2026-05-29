@@ -6,5 +6,6 @@ public record BalanceEntry(
         double depositAmount,
         double accountBalance,
         double poundChange,
-        double percentChange) {
+        double percentChange,
+        double profit) {
 }

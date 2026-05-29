@@ -92,6 +92,7 @@ public class Account {
         int id = entryCount()+1;
         double poundChange = 0.0;
         double percChange = 0.0;
+        double profit = 0.0;
 
         if (!entries.isEmpty()) {
             // Get pound + percentage changes
@@ -101,6 +102,7 @@ public class Account {
             poundChange = accBalance - lastEntry.accountBalance();
             percChange = (accBalance - lastEntry.accountBalance())/lastEntry.accountBalance() * 100;
             percChange = (double) Math.round(percChange * 100) /100; // Round to 2dp
+            profit = poundChange - depAmount;
         }
 
         // Update other account information
@@ -108,7 +110,7 @@ public class Account {
         this.totProfit += poundChange - depAmount;
         this.totDeposit += depAmount;
 
-        addEntry(id, date, depAmount, accBalance, poundChange, percChange);
+        addEntry(id, date, depAmount, accBalance, poundChange, percChange, profit);
     }
 
     // Add a new entry
@@ -117,8 +119,9 @@ public class Account {
                          double depositAmount,
                          double accountBalance,
                          double poundChange,
-                         double percentChange) {
-        entries.add(new BalanceEntry(id, date, depositAmount, accountBalance, poundChange, percentChange));
+                         double percentChange,
+                         double profit) {
+        entries.add(new BalanceEntry(id, date, depositAmount, accountBalance, poundChange, percentChange, profit));
         log.info("Balance entry added to account {}", name);
     }
 }
