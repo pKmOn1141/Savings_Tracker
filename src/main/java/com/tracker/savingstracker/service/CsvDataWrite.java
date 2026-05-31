@@ -42,7 +42,7 @@ public class CsvDataWrite {
 
         try (CSVWriter writer = new CSVWriter(new FileWriter(pathGen.pathGen(account.getName(), "entries.csv")))) {
             writer.writeNext(new String[]{
-                    "date", "depositAmount", "accountBalance", "poundChange", "percentChange", "profit"
+                    "id", "date", "depositAmount", "accountBalance", "poundChange", "percentChange", "profit"
             });
 
             for (BalanceEntry entry : entries) {

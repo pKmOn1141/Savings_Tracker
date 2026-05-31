@@ -8,12 +8,11 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.ArrayList;
 import java.util.Comparator;
 
+@Setter
+@Getter
 @Slf4j
 public class Account {
-    // Getters/Setters
     // Store in accountInfo csv
-    @Getter
-    @Setter
     @CsvBindByName
     private int id;
     @CsvBindByName
@@ -26,8 +25,6 @@ public class Account {
     private double totDeposit;
 
     // Store in entry csv
-    @Getter
-    @Setter
     private ArrayList<BalanceEntry> entries = new ArrayList<BalanceEntry>();
 
     // CSV Constructor
@@ -41,34 +38,6 @@ public class Account {
         this.name = name;
         this.totBalance = totBalance;
         this.totProfit = totProfit;
-        this.totDeposit = totDeposit;
-    }
-
-    public String getName() {
-        return name;
-    }
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public double getTotBalance() {
-        return totBalance;
-    }
-    public void setTotBalance(double totBalance) {
-        this.totBalance = totBalance;
-    }
-
-    public double getTotProfit() {
-        return totProfit;
-    }
-    public void setTotProfit(double totProfit) {
-        this.totProfit = totProfit;
-    }
-
-    public double getTotDeposit() {
-        return totDeposit;
-    }
-    public void setTotDeposit(double totDeposit) {
         this.totDeposit = totDeposit;
     }
 
@@ -89,7 +58,7 @@ public class Account {
 
     // Create the complete entry
     public void createEntry(String name, String date, double depAmount, double accBalance) {
-        int id = entryCount()+1;
+        int id = entryCount();
         double poundChange = 0.0;
         double percChange = 0.0;
         double profit = 0.0;
@@ -122,6 +91,5 @@ public class Account {
                          double percentChange,
                          double profit) {
         entries.add(new BalanceEntry(id, date, depositAmount, accountBalance, poundChange, percentChange, profit));
-        log.info("Balance entry added to account {}", name);
     }
 }

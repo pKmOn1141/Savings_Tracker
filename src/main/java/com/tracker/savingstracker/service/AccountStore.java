@@ -31,7 +31,7 @@ public class AccountStore {
     // New account
     public void createAccount(String name) {
         // New account info
-        int id = accounts.size()+1;
+        int id = accounts.size();
         double totBalance = 0.0;
         double totProfit = 0.0;
         double totDeposit = 0.0;
@@ -58,6 +58,17 @@ public class AccountStore {
                 return Optional.of(account);
             }
         }
+        return Optional.empty();
+    }
+
+    // Search for account by ID
+    public Optional<Account> findById(int id) {
+        for (Account account : accounts) {
+            if (account.getId() == id) {
+                return Optional.of(account);
+            }
+        }
+        log.info("Account not found with id {}", id);
         return Optional.empty();
     }
 
