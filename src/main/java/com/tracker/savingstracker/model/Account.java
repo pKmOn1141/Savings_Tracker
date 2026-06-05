@@ -65,7 +65,6 @@ public class Account {
 
         if (!entries.isEmpty()) {
             // Get pound + percentage changes
-            sortEntryByID(true);
             BalanceEntry lastEntry = entries.getLast();
 
             poundChange = accBalance - lastEntry.accountBalance();

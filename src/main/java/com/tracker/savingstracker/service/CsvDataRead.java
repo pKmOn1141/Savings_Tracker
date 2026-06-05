@@ -37,6 +37,7 @@ public class CsvDataRead {
     public void init() throws Exception {
         readAccountsInfo();
         readEntries();
+        accountStore.sortByID();
     }
 
     // Reading account information from both csv files
@@ -79,8 +80,6 @@ public class CsvDataRead {
                 }
             });
         }
-        // Order the accounts based off ID
-        accountStore.sortByID();
     }
 
     // Read "entries.csv"
@@ -113,6 +112,7 @@ public class CsvDataRead {
                                     // Search for account obj based off name
                                     Optional<Account> searchAcc = accountStore.findByName(accountDir.getFileName().toString());
                                     if (searchAcc.isPresent()) {
+                                        // Create entry in the array
                                         Account newAccount = searchAcc.get();
                                         loadEntry(newAccount, entry);
                                     }

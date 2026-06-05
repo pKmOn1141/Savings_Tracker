@@ -43,7 +43,6 @@ public class HomeController {
         Optional<Account> resultAcc = accountStore.findByName(accountName);
         if (resultAcc.isPresent()) {
             Account account = resultAcc.get();
-            account.sortEntryByID(false);
             log.info("Displaying {} account entries", accountName);
             model.addAttribute("entries", account.getEntries());
             model.addAttribute("selectedAccount", account.getName());

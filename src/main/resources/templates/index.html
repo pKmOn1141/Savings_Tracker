@@ -1,89 +1,440 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Savings Tracker</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+
+    <!-- Modal Styling -->
+    <style>
+        .modal {
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.4);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            padding: 0;
+            border-radius: 6px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid #ecf0f1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 1.25rem;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #7f8c8d;
+        }
+
+        .close-btn:hover {
+            color: #2c3e50;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+    </style>
 </head>
 <body>
 
-<h1>Savings Tracker</h1>
+<div class="app-container">
+    <!-- Top Banner -->
+    <div class="top-banner">
+        <h1 id="bannerTitle">Overview</h1>
+    </div>
 
-<h2>Accounts</h2>
-<table border="1">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Name</th>
-            <th>Balance</th>
-            <th>Profit</th>
-            <th>Total Deposited</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr th:each="account : ${accounts}">
-            <td th:text="${account.id}"></td>
-            <td th:text="${account.name}"></td>
-            <td th:text="${account.totBalance}"></td>
-            <td th:text="${account.totDeposit}"></td>
-            <td th:text="${account.totProfit}"></td>
-        </tr>
-        <tr th:if="${#lists.isEmpty(accounts)}">
-            <td colspan="5">No accounts yet.</td>
-        </tr>
-    </tbody>
-</table>
+    <!-- Main Layout: Sidebar + Content -->
+    <div class="main-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>Accounts</h2>
+            </div>
+            <nav class="accounts-list" id="accountsList">
+                <!-- Account items populated by JavaScript -->
+            </nav>
+            <button class="create-account-btn" id="openCreateAccountBtn">+ New Account</button>
+        </aside>
 
-<h2>Create New Account</h2>
-<form action="/new_account" method="post">
-    <label>Name: <input type="text" name="name" required/></label><br/>
-    <button type="submit">Create Account</button>
-</form>
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Overview Section (Default View) -->
+            <div id="overviewSection" class="overview-container active">
+                <div class="overview-grid">
+                    <!-- Total Balance Card -->
+                    <div class="overview-card total-balance-card">
+                        <div class="overview-card-label">Total Net Worth</div>
+                        <div class="overview-card-value" id="totalNetWorth">£0.00</div>
+                        <div class="overview-card-subtext">Across all accounts</div>
+                    </div>
+                </div>
+                <!-- Account Balance Cards -->
+                <div class="overview-grid" id="accountCardsGrid">
+                    <!-- Cards populated by JavaScript -->
+                </div>
+            </div>
 
-<h2>View Account Entries</h2>
-<form action="/entries" method="get">
-    <label>Account Name: <input type="text" name="accountName" required/></label>
-    <button type="submit">View Entries</button>
-</form>
+            <!-- Account Details Section -->
+            <div id="accountDetailsSection" class="account-details">
+                <div class="account-header">
+                    <button class="secondary" onclick="backToOverview()" style="margin-bottom: 1rem;">← Back to Overview</button>
+                </div>
 
-<div th:if="${entries != null}">
-    <h3 th:text="'Entries for: ' + ${selectedAccount}"></h3>
-    <table border="1">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Date</th>
-                <th>Deposit Amount</th>
-                <th>Account Balance</th>
-                <th>Pound Change</th>
-                <th>Percent Change</th>
-                <th>Profit</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr th:each="entry : ${entries}">
-                <td th:text="${entry.id}"></td>
-                <td th:text="${entry.date}"></td>
-                <td th:text="${entry.depositAmount}"></td>
-                <td th:text="${entry.accountBalance}"></td>
-                <td th:text="${entry.poundChange}"></td>
-                <td th:text="${entry.percentChange}"></td>
-                <td th:text="${entry.profit}"></td>
-            </tr>
-            <tr th:if="${#lists.isEmpty(entries)}">
-                <td colspan="7">No entries yet.</td>
-            </tr>
-        </tbody>
-    </table>
+                <!-- Account Statistics -->
+                <div class="account-stats" id="accountStatsGrid">
+                    <!-- Stats populated by JavaScript -->
+                </div>
+
+                <!-- Entries Table -->
+                <div class="entries-section">
+                    <h3>Deposits</h3>
+                    <table id="entriesTable">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Deposit Amount</th>
+                                <th>Account Balance</th>
+                                <th>Pound Change</th>
+                                <th>Percent Change</th>
+                                <th>Profit</th>
+                            </tr>
+                        </thead>
+                        <tbody id="entriesTableBody">
+                            <!-- Populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Add New Entry Button -->
+                <button id="openAddEntryBtn" class="form-section" style="width: 100%; padding: 1rem; cursor: pointer; border: 2px dashed #bdc3c7; background-color: transparent; color: var(--text-secondary); text-align: left;">
+                    <span style="font-weight: 500; color: var(--accent-color);">+ Add New Entry</span>
+                </button>
+            </div>
+        </main>
+    </div>
 </div>
 
-<h2>Create New Entry</h2>
-<form action="/new_entry" method="post">
-    <label>Name: <input type="text" name="name" required/></label><br/>
-    <label>Date: <input type="text" name="date" required/></label><br/>
-    <label>Deposit Amount: <input type="number" step="0.01" name="depositAmount" required/></label><br/>
-    <label>Account Balance: <input type="number" step="0.01" name="accountBalance" required/></label><br/>
-    <button type="submit">Submit Entry</button>
-</form>
+<!-- Modal: Create New Account -->
+<div id="createAccountModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Create New Account</h2>
+            <button class="close-btn" onclick="closeCreateAccountModal()">&times;</button>
+        </div>
+        <form action="/new_account" method="post" class="modal-body">
+            <div class="form-group">
+                <label for="accountName">Account Name</label>
+                <input type="text" id="accountName" name="name" required/>
+            </div>
+            <div class="form-actions">
+                <button type="submit">Create Account</button>
+                <button type="button" class="secondary" onclick="closeCreateAccountModal()">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal: Add New Entry -->
+<div id="addEntryModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Add New Entry</h2>
+            <button class="close-btn" onclick="closeAddEntryModal()">&times;</button>
+        </div>
+        <form id="addEntryForm" action="/new_entry" method="post" class="modal-body">
+            <input type="hidden" id="entryAccountName" name="name"/>
+            <div class="form-group">
+                <label for="entryDate">Date</label>
+                <input type="text" id="entryDate" name="date" required/>
+            </div>
+            <div class="form-group">
+                <label for="depositAmount">Deposit Amount (£)</label>
+                <input type="number" id="depositAmount" name="depositAmount" step="0.01" required/>
+            </div>
+            <div class="form-group">
+                <label for="accountBalance">Current Account Balance (£)</label>
+                <input type="number" id="accountBalance" name="accountBalance" step="0.01" required/>
+            </div>
+            <div class="form-actions">
+                <button type="submit">Add Entry</button>
+                <button type="button" class="secondary" onclick="closeAddEntryModal()">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- JavaScript for interactivity -->
+<script th:inline="javascript">
+    const accountsData = /*[[${accounts}]]*/ [];
+    const selectedAccountData = /*[[${selectedAccount}]]*/ null;
+    const entriesData = /*[[${entries}]]*/ null;
+
+    let currentSelectedAccount = null;
+
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        renderAccountsList();
+        renderOverview();
+
+        // Mark Total Net Worth as active by default (since overview is shown)
+        const totalItem = document.getElementById('totalNetWorthItem');
+        if (totalItem) {
+            totalItem.classList.add('active');
+        }
+
+        // If an account was selected (from entries view), show it
+        if (selectedAccountData && entriesData) {
+            const account = accountsData.find(a => a.name === selectedAccountData);
+            if (account) {
+                selectAccount(account);
+            }
+        }
+
+        // Event listeners
+        document.getElementById('openCreateAccountBtn').addEventListener('click', openCreateAccountModal);
+        document.getElementById('openAddEntryBtn').addEventListener('click', openAddEntryModal);
+    });
+
+    // Render accounts list in sidebar
+    function renderAccountsList() {
+        const accountsList = document.getElementById('accountsList');
+        accountsList.innerHTML = '';
+
+        // Calculate total net worth
+        let totalNetWorth = 0;
+        accountsData.forEach(account => {
+            totalNetWorth += account.totBalance;
+        });
+
+        // Add Total Net Worth item at top
+        const totalItem = document.createElement('a');
+        totalItem.href = '#';
+        totalItem.className = 'account-item total-net-worth-item';
+        totalItem.id = 'totalNetWorthItem';
+        totalItem.onclick = (e) => {
+            e.preventDefault();
+            backToOverview();
+        };
+
+        totalItem.innerHTML = `
+            <span class="account-item-name">Total Net Worth</span>
+            <span class="account-item-balance">£${totalNetWorth.toFixed(2)}</span>
+        `;
+
+        accountsList.appendChild(totalItem);
+
+        // Add separator
+        const separator = document.createElement('div');
+        separator.className = 'accounts-separator';
+        accountsList.appendChild(separator);
+
+        // Add account items
+        accountsData.forEach(account => {
+            const accountItem = document.createElement('a');
+            accountItem.href = '#';
+            accountItem.className = 'account-item';
+            accountItem.onclick = (e) => {
+                e.preventDefault();
+                selectAccount(account);
+            };
+
+            accountItem.innerHTML = `
+                <span class="account-item-name">${account.name}</span>
+                <span class="account-item-balance">£${account.totBalance.toFixed(2)}</span>
+            `;
+
+            accountsList.appendChild(accountItem);
+        });
+    }
+
+    // Select an account and show its details
+    function selectAccount(account) {
+        currentSelectedAccount = account;
+
+        // Update sidebar highlighting
+        document.querySelectorAll('.account-item').forEach(item => {
+            item.classList.remove('active');
+        });
+        event.target.closest('.account-item')?.classList.add('active');
+
+        // Update banner
+        document.getElementById('bannerTitle').textContent = account.name;
+
+        // Hide overview, show details
+        document.getElementById('overviewSection').classList.remove('active');
+        document.getElementById('accountDetailsSection').classList.add('active');
+
+        // Render account details
+        renderAccountDetails(account);
+        renderEntries(account);
+    }
+
+    // Go back to overview
+    function backToOverview() {
+        currentSelectedAccount = null;
+        document.getElementById('bannerTitle').textContent = 'Overview';
+        document.getElementById('overviewSection').classList.add('active');
+        document.getElementById('accountDetailsSection').classList.remove('active');
+
+        // Remove active from all items and add to Total Net Worth
+        document.querySelectorAll('.account-item').forEach(item => {
+            item.classList.remove('active');
+        });
+        const totalItem = document.getElementById('totalNetWorthItem');
+        if (totalItem) {
+            totalItem.classList.add('active');
+        }
+    }
+
+    // Render overview with account cards
+    function renderOverview() {
+        let totalNetWorth = 0;
+        const accountCardsGrid = document.getElementById('accountCardsGrid');
+        accountCardsGrid.innerHTML = '';
+
+        accountsData.forEach(account => {
+            totalNetWorth += account.totBalance;
+
+            const card = document.createElement('div');
+            card.className = 'overview-card';
+            card.style.cursor = 'pointer';
+            card.onclick = () => selectAccount(account);
+
+            // Determine profit color class and format
+            const profitClass = account.totProfit >= 0 ? 'profit-positive' : 'profit-negative';
+            const profitSign = account.totProfit >= 0 ? '+' : '-';
+            const profitValue = Math.abs(account.totProfit);
+
+            card.innerHTML = `
+                <div class="overview-card-label">${account.name}</div>
+                <div class="overview-card-value">£${account.totBalance.toFixed(2)}</div>
+                <div class="overview-card-subtext">Profit: <span class="${profitClass}">${profitSign}£${profitValue.toFixed(2)}</span></div>
+            `;
+            accountCardsGrid.appendChild(card);
+        });
+
+        document.getElementById('totalNetWorth').textContent = '£' + totalNetWorth.toFixed(2);
+    }
+
+    // Render account details
+    function renderAccountDetails(account) {
+        const statsGrid = document.getElementById('accountStatsGrid');
+
+        // Determine profit color class and format
+        const profitClass = account.totProfit >= 0 ? 'profit-positive' : 'profit-negative';
+        const profitSign = account.totProfit >= 0 ? '+' : '-';
+        const profitValue = Math.abs(account.totProfit);
+
+        statsGrid.innerHTML = `
+            <div class="account-stat-card">
+                <div class="account-stat-label">Total Balance</div>
+                <div class="account-stat-value">£${account.totBalance.toFixed(2)}</div>
+            </div>
+            <div class="account-stat-card">
+                <div class="account-stat-label">Total Deposited</div>
+                <div class="account-stat-value">£${account.totDeposit.toFixed(2)}</div>
+            </div>
+            <div class="account-stat-card">
+                <div class="account-stat-label">Total Profit</div>
+                <div class="account-stat-value ${profitClass}">${profitSign}£${profitValue.toFixed(2)}</div>
+            </div>
+        `;
+    }
+
+    function sortEntriesByID(entries) {
+        return entries.sort((a, b) => b.id - a.id);
+    }
+
+    // Render entries table
+    function renderEntries(account) {
+        const entriesTableBody = document.getElementById('entriesTableBody');
+
+        if (!account.entries || account.entries.length === 0) {
+            entriesTableBody.innerHTML = '<tr><td colspan="6" class="empty-state">No entries yet</td></tr>';
+            return;
+        }
+
+        sortEntriesByID(account.entries);
+        entriesTableBody.innerHTML = account.entries.map(entry => {
+            console.log("entry", entry.id)
+            // Determine profit color class and format
+            const profitClass = entry.profit >= 0 ? 'profit-positive' : 'profit-negative';
+            const profitSign = entry.profit >= 0 ? '+' : '-';
+            const profitValue = Math.abs(entry.profit);
+
+            return `
+            <tr>
+                <td>${entry.date}</td>
+                <td>£${entry.depositAmount.toFixed(2)}</td>
+                <td>£${entry.accountBalance.toFixed(2)}</td>
+                <td>£${entry.poundChange.toFixed(2)}</td>
+                <td>${entry.percentChange.toFixed(2)}%</td>
+                <td><span class="${profitClass}">${profitSign}£${profitValue.toFixed(2)}</span></td>
+            </tr>
+        `;
+        }).join('');
+    }
+
+    // Modal functions
+    function openCreateAccountModal() {
+        document.getElementById('createAccountModal').style.display = 'flex';
+    }
+
+    function closeCreateAccountModal() {
+        document.getElementById('createAccountModal').style.display = 'none';
+    }
+
+    function openAddEntryModal() {
+        if (!currentSelectedAccount) {
+            alert('Please select an account first');
+            return;
+        }
+        document.getElementById('entryAccountName').value = currentSelectedAccount.name;
+        document.getElementById('addEntryModal').style.display = 'flex';
+    }
+
+    function closeAddEntryModal() {
+        document.getElementById('addEntryModal').style.display = 'none';
+    }
+
+    // Close modals when clicking outside
+    window.onclick = function(event) {
+        const createModal = document.getElementById('createAccountModal');
+        const entryModal = document.getElementById('addEntryModal');
+
+        if (event.target === createModal) {
+            createModal.style.display = 'none';
+        }
+        if (event.target === entryModal) {
+            entryModal.style.display = 'none';
+        }
+    }
+</script>
 
 </body>
 </html>
