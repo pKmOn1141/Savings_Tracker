@@ -79,8 +79,8 @@ public class Account {
 
         // Update other account information
         this.totBalance = accBalance;
-        this.totProfit += poundChange - depAmount;
         this.totDeposit += depAmount;
+        this.totProfit = accBalance - depAmount;
 
         addEntry(id, date, depAmount, accBalance, poundChange, percChange, profit);
     }
