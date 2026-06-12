@@ -65,4 +65,12 @@ public class CsvDataWrite {
         writeAccountEntries(account);
         log.info("Completed writing account {}", account.getName());
     }
+
+    // Save notes to notes.txt
+    public void writeNotes(Account account) throws Exception {
+        try (Writer writer = new FileWriter(pathGen.pathGen(account.getName(), "notes.txt"))) {
+            writer.write(account.getNotes());
+            log.info("Written {} notes", account.getName());
+        }
+    }
 }

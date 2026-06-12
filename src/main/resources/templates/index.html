@@ -58,6 +58,35 @@
         .modal-body {
             padding: 1.5rem;
         }
+
+        .notes-section {
+            margin: 2rem 0;
+        }
+
+        .notes-section label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .notes-section textarea {
+            width: 100%;
+            padding: 1rem;
+            box-sizing: border-box;
+            resize: none;
+            min-height: 150px;
+            border: 1px solid #bdc3c7;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 1rem;
+        }
+
+        .save-notes-btn {
+            display: block;
+            margin-top: 0.5rem;
+            margin-left: 0;
+        }
     </style>
 </head>
 <body>
@@ -108,6 +137,16 @@
                 <!-- Account Statistics -->
                 <div class="account-stats" id="accountStatsGrid">
                     <!-- Stats populated by JavaScript -->
+                </div>
+
+                <!-- Notes Section -->
+                <div class="notes-section">
+                    <label for="accountNotes">Notes</label>
+                    <form action="/write_notes" method="post">
+                        <input type="hidden" name="name" th:value="${selectedAccount}"/>
+                        <textarea id="accountNotes" name="notes" placeholder="Add notes about this account..."></textarea>
+                        <button class="save-notes-btn" type="submit">Save</button>
+                    </form>
                 </div>
 
                 <!-- Entries Table -->
@@ -292,6 +331,10 @@
         // Render account details
         renderAccountDetails(account);
         renderEntries(account);
+
+        // populate notes
+        document.querySelector('input[name="name"]').value = account.name;
+        document.getElementById('accountNotes').value = account.notes || '';
     }
 
     // Go back to overview

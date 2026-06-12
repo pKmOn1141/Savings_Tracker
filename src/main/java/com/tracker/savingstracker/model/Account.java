@@ -27,6 +27,9 @@ public class Account {
     // Store in entry csv
     private ArrayList<BalanceEntry> entries = new ArrayList<BalanceEntry>();
 
+    // Store in notes.txt
+    private String notes;
+
     // CSV Constructor
     public Account() {
 
@@ -39,6 +42,7 @@ public class Account {
         this.totBalance = totBalance;
         this.totProfit = totProfit;
         this.totDeposit = totDeposit;
+        this.notes = "";
     }
 
     public int entryCount() {
@@ -57,7 +61,7 @@ public class Account {
     }
 
     // Create the complete entry
-    public void createEntry(String name, String date, double depAmount, double accBalance) {
+    public void createEntry(String date, double depAmount, double accBalance) {
         int id = entryCount();
         double poundChange = 0.0;
         double percChange = 0.0;

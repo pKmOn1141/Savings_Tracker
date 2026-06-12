@@ -46,6 +46,7 @@ public class HomeController {
             log.info("Displaying {} account entries", accountName);
             model.addAttribute("entries", account.getEntries());
             model.addAttribute("selectedAccount", account.getName());
+            model.addAttribute("notes", account.getNotes());
         }
         model.addAttribute("accounts", accountStore.getAccounts());
         return "index";
@@ -74,7 +75,7 @@ public class HomeController {
         if (searchResult.isPresent()) {
             Account targetAccount = searchResult.get();
             // Create Entry
-            targetAccount.createEntry(name, date, depositAmount, accountBalance);
+            targetAccount.createEntry(date, depositAmount, accountBalance);
             // Rewrite account to csv
             try {
                 csvDataWrite.writeEntireAcc(targetAccount);
@@ -85,6 +86,20 @@ public class HomeController {
         }
         else {
             log.warn("Account with name {} not found", name);
+        }
+        return "redirect:/";
+    }
+
+    @PostMapping("/write_notes")
+    public String writeNotes(
+            @RequestParam String name,
+            @RequestParam String notes
+            ) throws Exception {
+        Optional<Account> searchResult = accountStore.findByName(name);
+        if (searchResult.isPresent()) {
+            Account targetAccount = searchResult.get();
+            targetAccount.setNotes(notes);
+            csvDataWrite.writeNotes(targetAccount);
         }
         return "redirect:/";
     }

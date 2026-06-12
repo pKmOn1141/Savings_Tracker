@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import jakarta.annotation.PostConstruct;
 
+import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.Reader;
 import java.nio.file.Files;
@@ -37,6 +38,7 @@ public class CsvDataRead {
     public void init() throws Exception {
         readAccountsInfo();
         readEntries();
+        readNotes();
         accountStore.sortByID();
     }
 
@@ -140,5 +142,48 @@ public class CsvDataRead {
                 Double.parseDouble(data[5]),
                 Double.parseDouble(data[6])
         );
+    }
+
+    public void readNotes() throws Exception{
+
+        // Check that the paths exist
+        Path directory = Paths.get(path);
+
+        if  (!Files.exists(directory) || !Files.isDirectory(directory)) {
+            log.warn("No directories exist");
+            return;
+        }
+
+        try (Stream<Path> accountDirs = Files.list(Paths.get(path))) {
+            // Iterate through each file directory
+            accountDirs.filter(Files::isDirectory).forEach(accountDir -> {
+                try (Stream<Path> files = Files.list(accountDir)) {
+                    // Filter the files to "notes.txt", then load
+                    files.filter(file -> file.toString().endsWith("notes.txt")).forEach(txtFile -> {
+                        // Read the selected file
+                        try (BufferedReader reader = Files.newBufferedReader(txtFile)) {
+                            StringBuilder line = new StringBuilder();
+                            String newLine;
+                            while ((newLine = reader.readLine()) != null) {
+                                line.append(newLine).append("\n");
+                            }
+                            // Search for account obj based off name
+                            Optional<Account> searchAcc = accountStore.findByName(accountDir.getFileName().toString());
+                            if (searchAcc.isPresent()) {
+                                // Save notes to account
+                                Account newAccount = searchAcc.get();
+                                newAccount.setNotes(line.toString());
+                            }
+
+                            log.info("Finished reading notes from {} ", accountDir.getFileName());
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+        }
     }
 }
