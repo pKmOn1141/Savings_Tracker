@@ -3,6 +3,7 @@ package com.tracker.savingstracker.controller;
 import com.tracker.savingstracker.model.Account;
 import com.tracker.savingstracker.service.AccountStore;
 import com.tracker.savingstracker.service.CsvDataWrite;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,12 +29,17 @@ public class HomeController {
 
     // DISPLAY FUNCTIONS
 
+    // Imports selected theme
+    @Value("${app.css.file}")
+    private String cssFile;
+
     // Display main page
     @GetMapping("/")
     public String home(Model model) throws Exception {
         log.info(" ");
         log.info("Refreshing home page");
         model.addAttribute("accounts", accountStore.getAccounts());
+        model.addAttribute("cssFile", cssFile);
         return "index";
     }
 

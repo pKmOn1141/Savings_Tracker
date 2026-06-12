@@ -1,0 +1,856 @@
+/* =====================================================
+   Savings Tracker - Nature Growth Theme
+   Greens, earth tones, soft gradients
+   Visual metaphor: savings grow like plants
+   Progress bars as vines, trees, or leaves
+   ===================================================== */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    /* Nature Palette - Greens & Earth Tones */
+    --primary-bg: #f5f9f6;
+    --secondary-bg: #e8f3ef;
+    --tertiary-bg: #daeee8;
+    --sidebar-bg: #f0f7f3;
+
+    /* Growth Colors - Leaf & Plant Tones */
+    --leaf-light: #a8d5ba;
+    --leaf-medium: #6ba587;
+    --leaf-dark: #2d5a47;
+    --sage-green: #9caa8e;
+    --moss-green: #7a9b6f;
+    --forest-green: #3a6b52;
+    --earth-brown: #8b7355;
+    --soil-brown: #6b5344;
+
+    /* Accent Colors - Growth Indicators */
+    --growth-accent: #7cb342;
+    --sprout-color: #9ccc65;
+    --blossom-color: #d4a574;
+    --root-color: #8d6e63;
+
+    /* Text Colors */
+    --text-primary: #1b4332;
+    --text-secondary: #52796f;
+    --text-muted: #81c784;
+
+    /* Functional Colors */
+    --success-color: #7cb342;
+    --danger-color: #d32f2f;
+    --warning-color: #f57c00;
+    --info-color: #0288d1;
+
+    /* Borders & Shadows */
+    --border-color: #c8e6c9;
+    --border-soft: #d1e8d1;
+    --shadow: 0 2px 8px rgba(45, 90, 71, 0.08);
+    --shadow-lg: 0 4px 12px rgba(45, 90, 71, 0.12);
+    --glow-growth: 0 0 12px rgba(123, 179, 66, 0.2);
+
+    /* Nature Pattern - Subtle leaf background */
+    --leaf-pattern: repeating-linear-gradient(
+        45deg,
+        transparent,
+        transparent 35px,
+        rgba(123, 179, 66, 0.02) 35px,
+        rgba(123, 179, 66, 0.02) 70px
+    );
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background-color: var(--primary-bg);
+    color: var(--text-primary);
+    overflow: hidden;
+    background-image: var(--leaf-pattern);
+}
+
+/* =====================================================
+   Layout: Container with Sidebar + Main Content
+   ===================================================== */
+
+.app-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    background-color: var(--primary-bg);
+}
+
+.top-banner {
+    background: linear-gradient(90deg, var(--forest-green) 0%, var(--leaf-dark) 50%, var(--moss-green) 100%);
+    color: white;
+    padding: 1rem 2rem;
+    border-bottom: 2px solid var(--leaf-medium);
+    box-shadow: var(--shadow-lg);
+    flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.top-banner::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: var(--leaf-pattern);
+    opacity: 0.1;
+    pointer-events: none;
+}
+
+.top-banner h1 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.15);
+    position: relative;
+    z-index: 1;
+}
+
+.main-layout {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+
+/* =====================================================
+   Sidebar (1/5 width)
+   ===================================================== */
+
+.sidebar {
+    width: 20%;
+    background: linear-gradient(180deg, var(--sidebar-bg) 0%, var(--secondary-bg) 100%);
+    border-right: 2px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    flex-shrink: 0;
+    box-shadow: inset -2px 0 4px rgba(45, 90, 71, 0.05);
+}
+
+.sidebar-header {
+    padding: 1.5rem 1rem;
+    border-bottom: 2px solid var(--border-color);
+    flex-shrink: 0;
+    background: linear-gradient(90deg, rgba(107, 165, 135, 0.05), transparent);
+}
+
+.sidebar-header h2 {
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--leaf-dark);
+}
+
+.accounts-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0.5rem 0;
+}
+
+.account-item {
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    border-left: 3px solid transparent;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    color: var(--text-secondary);
+    display: block;
+    position: relative;
+}
+
+.account-item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, transparent, rgba(107, 165, 135, 0.08));
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.account-item:hover {
+    background-color: rgba(156, 202, 101, 0.08);
+    color: var(--leaf-dark);
+    border-left-color: var(--moss-green);
+    box-shadow: inset 0 0 8px rgba(107, 165, 135, 0.08);
+}
+
+.account-item:hover::before {
+    opacity: 1;
+}
+
+.account-item.active {
+    background-color: rgba(123, 179, 66, 0.12);
+    color: var(--forest-green);
+    border-left-color: var(--growth-accent);
+    box-shadow: 0 0 10px rgba(123, 179, 66, 0.15) inset;
+    font-weight: 500;
+}
+
+.total-net-worth-item {
+    padding: 1rem;
+    font-weight: 600;
+    background-color: rgba(156, 202, 101, 0.08);
+    border-left: 3px solid transparent;
+    color: var(--forest-green);
+}
+
+.total-net-worth-item:hover {
+    background-color: rgba(156, 202, 101, 0.12);
+    border-left-color: var(--growth-accent);
+}
+
+.total-net-worth-item.active {
+    background-color: rgba(156, 202, 101, 0.15);
+    border-left-color: var(--growth-accent);
+}
+
+.accounts-separator {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border-color), transparent);
+    margin: 0.5rem 0;
+}
+
+.account-item-name {
+    display: block;
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+    letter-spacing: 0.5px;
+}
+
+.account-item-balance {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    letter-spacing: 0.3px;
+}
+
+.create-account-btn {
+    margin: 1rem;
+    padding: 0.75rem 1rem;
+    background: linear-gradient(135deg, var(--moss-green) 0%, var(--leaf-medium) 100%);
+    color: white;
+    border: 2px solid var(--leaf-medium);
+    border-radius: 4px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: var(--shadow);
+    position: relative;
+    overflow: hidden;
+}
+
+.create-account-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+    transition: left 0.5s ease;
+}
+
+.create-account-btn:hover {
+    background: linear-gradient(135deg, var(--leaf-medium) 0%, var(--moss-green) 100%);
+    box-shadow: var(--shadow-lg), var(--glow-growth);
+}
+
+.create-account-btn:hover::before {
+    left: 100%;
+}
+
+/* =====================================================
+   Main Content Area
+   ===================================================== */
+
+.main-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 2rem;
+    background: linear-gradient(135deg, var(--primary-bg) 0%, rgba(168, 213, 186, 0.05) 100%);
+    position: relative;
+}
+
+.main-content::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: var(--leaf-pattern);
+    opacity: 0.03;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.main-content > * {
+    position: relative;
+    z-index: 1;
+}
+
+/* =====================================================
+   Overview Section
+   ===================================================== */
+
+.overview-container {
+    max-width: 1200px;
+    display: none;
+}
+
+.overview-container.active {
+    display: block;
+}
+
+.overview-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.overview-card {
+    background: linear-gradient(135deg, #ffffff 0%, rgba(168, 213, 186, 0.08) 100%);
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: var(--shadow);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    cursor: default;
+}
+
+.overview-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: var(--leaf-pattern);
+    opacity: 0.05;
+    pointer-events: none;
+}
+
+.overview-card:hover {
+    box-shadow: var(--shadow-lg), var(--glow-growth);
+    border-color: var(--leaf-medium);
+    background: linear-gradient(135deg, #ffffff 0%, rgba(168, 213, 186, 0.12) 100%);
+    transform: translateY(-2px);
+}
+
+.overview-card > * {
+    position: relative;
+    z-index: 1;
+}
+
+.overview-card-label {
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+}
+
+.overview-card-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--forest-green);
+    margin-bottom: 0.75rem;
+    letter-spacing: 1px;
+}
+
+.overview-card-subtext {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+}
+
+.total-balance-card {
+    grid-column: 1 / -1;
+    background: linear-gradient(135deg, var(--forest-green) 0%, var(--moss-green) 100%);
+    border-color: var(--growth-accent);
+    box-shadow: var(--shadow-lg), var(--glow-growth);
+}
+
+.total-balance-card .overview-card-label {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.total-balance-card .overview-card-value {
+    color: var(--sprout-color);
+    font-size: 2.5rem;
+}
+
+.total-balance-card .overview-card-subtext {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+/* =====================================================
+   Account Details Section
+   ===================================================== */
+
+.account-details {
+    display: none;
+}
+
+.account-details.active {
+    display: block;
+}
+
+.account-header {
+    margin-bottom: 2rem;
+}
+
+.account-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.account-stat-card {
+    background: linear-gradient(135deg, #ffffff 0%, rgba(168, 213, 186, 0.08) 100%);
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1.25rem;
+    box-shadow: var(--shadow);
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.account-stat-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--growth-accent), transparent);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.account-stat-card:hover {
+    border-color: var(--leaf-medium);
+    box-shadow: var(--shadow-lg), var(--glow-growth);
+}
+
+.account-stat-card:hover::after {
+    opacity: 1;
+}
+
+.account-stat-label {
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+}
+
+.account-stat-value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--forest-green);
+}
+
+.profit-positive {
+    color: var(--growth-accent);
+    font-weight: 700;
+}
+
+.profit-negative {
+    color: var(--danger-color);
+    font-weight: 700;
+}
+
+/* =====================================================
+   Table Styles
+   ===================================================== */
+
+.entries-section {
+    margin-bottom: 2rem;
+}
+
+.entries-section h3 {
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    color: var(--forest-green);
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: linear-gradient(135deg, #ffffff 0%, rgba(168, 213, 186, 0.06) 100%);
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+}
+
+thead {
+    background: linear-gradient(90deg, rgba(107, 165, 135, 0.15), rgba(156, 202, 101, 0.1));
+    border-bottom: 2px solid var(--leaf-medium);
+}
+
+th {
+    padding: 1rem;
+    text-align: left;
+    font-weight: 700;
+    color: var(--forest-green);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid rgba(200, 230, 201, 0.5);
+    color: var(--text-primary);
+    background-color: transparent;
+    font-size: 0.9rem;
+}
+
+tbody tr {
+    transition: all 0.2s ease;
+}
+
+tbody tr:hover {
+    background-color: rgba(156, 202, 101, 0.06);
+    box-shadow: inset 0 0 8px rgba(107, 165, 135, 0.05);
+}
+
+tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-secondary);
+    font-style: italic;
+}
+
+/* =====================================================
+   Forms
+   ===================================================== */
+
+.form-section {
+    background: linear-gradient(135deg, #ffffff 0%, rgba(168, 213, 186, 0.08) 100%);
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: var(--shadow);
+}
+
+.form-section h3 {
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    color: var(--forest-green);
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+}
+
+.form-group input {
+    padding: 0.75rem 1rem;
+    border: 2px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 0.95rem;
+    font-family: inherit;
+    background-color: rgba(255, 255, 255, 0.6);
+    color: var(--text-primary);
+    transition: all 0.2s ease;
+    letter-spacing: 0.5px;
+}
+
+.form-group input::placeholder {
+    color: var(--text-muted);
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: var(--growth-accent);
+    box-shadow: 0 0 12px rgba(123, 179, 66, 0.2);
+    background-color: rgba(255, 255, 255, 0.9);
+}
+
+.form-actions {
+    display: flex;
+    gap: 0.75rem;
+}
+
+button {
+    padding: 0.75rem 1.5rem;
+    background: linear-gradient(135deg, var(--moss-green) 0%, var(--leaf-medium) 100%);
+    color: white;
+    border: 2px solid var(--leaf-medium);
+    border-radius: 4px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: var(--shadow);
+    position: relative;
+    overflow: hidden;
+}
+
+button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+    transition: left 0.4s ease;
+}
+
+button:hover {
+    background: linear-gradient(135deg, var(--leaf-medium) 0%, var(--moss-green) 100%);
+    box-shadow: var(--shadow-lg), var(--glow-growth);
+}
+
+button:hover::before {
+    left: 100%;
+}
+
+button.secondary {
+    border-color: var(--text-secondary);
+    color: var(--text-primary);
+    background: linear-gradient(135deg, rgba(200, 230, 201, 0.3), rgba(168, 213, 186, 0.2));
+}
+
+button.secondary:hover {
+    border-color: var(--growth-accent);
+    color: var(--forest-green);
+    background: linear-gradient(135deg, rgba(200, 230, 201, 0.5), rgba(168, 213, 186, 0.3));
+    box-shadow: var(--shadow), var(--glow-growth);
+}
+
+/* =====================================================
+   Progress Bars - Vine/Plant Growth Metaphor
+   ===================================================== */
+
+progress {
+    width: 100%;
+    height: 12px;
+    border-radius: 6px;
+    background: linear-gradient(90deg, rgba(200, 230, 201, 0.5), rgba(200, 230, 201, 0.3));
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+}
+
+progress::-webkit-progress-bar {
+    background: linear-gradient(90deg, rgba(200, 230, 201, 0.5), rgba(200, 230, 201, 0.3));
+    border-radius: 6px;
+}
+
+progress::-webkit-progress-value {
+    background: linear-gradient(90deg, var(--moss-green), var(--growth-accent));
+    border-radius: 6px;
+    box-shadow: 0 0 8px rgba(123, 179, 66, 0.4);
+}
+
+progress::-moz-progress-bar {
+    background: linear-gradient(90deg, var(--moss-green), var(--growth-accent));
+    border-radius: 6px;
+    box-shadow: 0 0 8px rgba(123, 179, 66, 0.4);
+}
+
+/* =====================================================
+   Responsive Design
+   ===================================================== */
+
+@media (max-width: 768px) {
+    .main-layout {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
+        border-right: none;
+        border-bottom: 2px solid var(--border-color);
+        max-height: 180px;
+        flex-direction: row;
+        justify-content: space-between;
+        overflow-x: auto;
+    }
+
+    .sidebar-header {
+        border-bottom: none;
+        border-right: 1px solid var(--border-color);
+        padding: 1rem;
+    }
+
+    .accounts-list {
+        display: flex;
+        overflow-x: auto;
+        overflow-y: hidden;
+        flex: 1;
+    }
+
+    .account-item {
+        white-space: nowrap;
+        border-left: none;
+        border-bottom: 3px solid transparent;
+    }
+
+    .account-item:hover,
+    .account-item.active {
+        border-left: none;
+        border-bottom-color: var(--growth-accent);
+    }
+
+    .create-account-btn {
+        margin: 0.5rem;
+    }
+
+    .overview-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .main-content {
+        padding: 1rem;
+    }
+
+    th, td {
+        padding: 0.5rem;
+        font-size: 0.8rem;
+    }
+}
+
+/* =====================================================
+   Scrollbar Styling - Nature Inspired
+   ===================================================== */
+
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(168, 213, 186, 0.1);
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, var(--moss-green), var(--growth-accent));
+    border-radius: 5px;
+    box-shadow: 0 0 8px rgba(123, 179, 66, 0.2);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, var(--growth-accent), var(--leaf-medium));
+    box-shadow: 0 0 12px rgba(123, 179, 66, 0.4);
+}
+
+/* =====================================================
+   Notes Section
+   ===================================================== */
+
+.notes-section {
+    margin: 2rem 0;
+    background: linear-gradient(135deg, #ffffff 0%, rgba(168, 213, 186, 0.08) 100%);
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: var(--shadow);
+}
+
+.notes-section label {
+    display: block;
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+    color: var(--forest-green);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.notes-section textarea {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    box-sizing: border-box;
+    resize: none;
+    min-height: 150px;
+    border: 2px solid var(--border-color);
+    border-radius: 4px;
+    font-family: inherit;
+    font-size: 0.95rem;
+    background-color: rgba(255, 255, 255, 0.6);
+    color: var(--text-primary);
+    transition: all 0.2s ease;
+}
+
+.notes-section textarea::placeholder {
+    color: var(--text-muted);
+}
+
+.notes-section textarea:focus {
+    outline: none;
+    border-color: var(--growth-accent);
+    box-shadow: 0 0 12px rgba(123, 179, 66, 0.2);
+    background-color: rgba(255, 255, 255, 0.9);
+}
+
+.save-notes-btn {
+    display: block;
+    margin-top: 0.75rem;
+    margin-left: 0;
+}
+
+/* =====================================================
+   Chart Preparation - Growth Color Palette for Data Viz
+   ===================================================== */
+
+:root {
+    --chart-color-1: #7cb342;  /* Growth Green */
+    --chart-color-2: #9ccc65;  /* Sprout Green */
+    --chart-color-3: #d4a574;  /* Blossom */
+    --chart-color-4: #a8d5ba;  /* Leaf Light */
+    --chart-color-5: #6ba587;  /* Leaf Medium */
+    --chart-color-6: #8b7355;  /* Earth Brown */
+}
+
