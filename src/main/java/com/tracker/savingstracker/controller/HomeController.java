@@ -55,6 +55,7 @@ public class HomeController {
             model.addAttribute("notes", account.getNotes());
         }
         model.addAttribute("accounts", accountStore.getAccounts());
+        model.addAttribute("cssFile", cssFile);
         return "index";
     }
 
