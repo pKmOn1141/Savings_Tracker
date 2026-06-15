@@ -1,0 +1,235 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# Build & Package – SavingsTrackerApp
+#
+# Workflow overview:
+#   1. build-jar  – Compile the Spring Boot fat-jar on Ubuntu using Maven.
+#   2. package    – Run jpackage in parallel on:
+#                     • macOS   → .dmg  (bundled JRE, optional .icns icon)
+#                     • Windows → .exe  (bundled JRE, --win-console, .ico icon)
+#
+# The fat-jar is shared between jobs via GitHub Actions artifacts so Maven
+# only runs once. Both platform jobs are independent and run in parallel.
+# ═══════════════════════════════════════════════════════════════════════════════
+
+name: Build and Package SavingsTrackerApp
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  # Allow manual runs from the GitHub Actions tab
+  workflow_dispatch:
+
+jobs:
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Job 1 – Compile the Spring Boot fat-jar with Maven
+  #
+  # Runs on Ubuntu to keep build times short and avoid platform differences
+  # in the compile step. The resulting jar is uploaded as an artifact so both
+  # platform packaging jobs can download it without rebuilding from source.
+  # ─────────────────────────────────────────────────────────────────────────────
+  build-jar:
+    name: Build Spring Boot JAR
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # JDK 26 is required to compile; Maven cache speeds up repeated runs
+      - name: Set up JDK 26
+        uses: actions/setup-java@v4
+        with:
+          java-version: '26'
+          distribution: 'temurin'
+          cache: maven
+
+      # -DskipTests keeps the packaging workflow fast;
+      # run tests in a dedicated test workflow if needed
+      - name: Build fat-jar with Maven
+        run: mvn --no-transfer-progress clean package -DskipTests
+
+      # Locate the fat-jar dynamically so the exact artifact name is never
+      # hardcoded. Excludes *-sources and *-javadoc jars. Fails loudly if
+      # the build somehow produced no jar.
+      - name: Locate generated JAR and validate
+        id: find-jar
+        run: |
+          JAR_PATH=$(find target -maxdepth 1 -name "*.jar" \
+            ! -name "*sources*" ! -name "*javadoc*" | head -1)
+          if [ -z "$JAR_PATH" ]; then
+            echo "::error::No JAR found in target/. Check that the Maven build succeeded."
+            exit 1
+          fi
+          echo "Found JAR: $JAR_PATH"
+          echo "jar_path=$JAR_PATH" >> "$GITHUB_OUTPUT"
+
+      # Share the jar with the downstream packaging jobs
+      - name: Upload JAR as workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-jar
+          path: ${{ steps.find-jar.outputs.jar_path }}
+          if-no-files-found: error
+
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Job 2 – Platform-specific installers via jpackage
+  #
+  # A matrix spawns two parallel jobs so macOS and Windows packaging happen
+  # at the same time. Each job:
+  #   • downloads the fat-jar from job 1
+  #   • prepares the jpackage input directory
+  #   • invokes jpackage with a bundled JRE
+  #   • uploads the resulting installer as a downloadable artifact
+  # ─────────────────────────────────────────────────────────────────────────────
+  package:
+    name: Package – ${{ matrix.platform-label }}
+    needs: build-jar          # wait for the jar to be built before packaging
+
+    strategy:
+      fail-fast: false        # let both platforms finish even if one fails
+      matrix:
+        include:
+          - os: macos-latest
+            platform-label: macOS
+            package-type: dmg
+            artifact-ext: dmg
+          - os: windows-latest
+            platform-label: Windows
+            package-type: exe
+            artifact-ext: exe
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      # Checkout is required so icon files in the repository root are available
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # jpackage ships inside the JDK – installing JDK 26 provides the tool
+      - name: Set up JDK 26
+        uses: actions/setup-java@v4
+        with:
+          java-version: '26'
+          distribution: 'temurin'
+
+      # jpackage needs WiX Toolset 3.x to produce a Windows .exe installer.
+      # Chocolatey and WiX are pre-installed on GitHub's windows-latest runner,
+      # but we upgrade here to ensure we have a compatible version.
+      - name: Ensure WiX Toolset is available (Windows only)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: choco upgrade wixtoolset --yes --no-progress
+
+      # Download the fat-jar built in job 1 directly into the jpackage input
+      # directory so it is ready to pass to --input without any extra moves
+      - name: Download fat-jar artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: app-jar
+          path: jpackage/input
+
+      # ── Locate JAR name (needed as the --main-jar argument) ────────────────
+      # Two separate steps because shell syntax differs between platforms.
+
+      - name: Locate JAR name (macOS)
+        if: runner.os == 'macOS'
+        id: find-jar-mac
+        shell: bash
+        run: |
+          JAR_NAME=$(find jpackage/input -name "*.jar" | head -1 | xargs basename)
+          if [ -z "$JAR_NAME" ]; then
+            echo "::error::JAR not found in jpackage/input"
+            exit 1
+          fi
+          echo "jar_name=$JAR_NAME" >> "$GITHUB_OUTPUT"
+
+      - name: Locate JAR name (Windows)
+        if: runner.os == 'Windows'
+        id: find-jar-win
+        shell: pwsh
+        run: |
+          $jar = Get-ChildItem -Path "jpackage\input" -Filter "*.jar" | Select-Object -First 1
+          if (-not $jar) {
+            Write-Error "JAR not found in jpackage\input"
+            exit 1
+          }
+          echo "jar_name=$($jar.Name)" >> $env:GITHUB_OUTPUT
+
+      # ── macOS: produce a .dmg installer ────────────────────────────────────
+      # The Spring Boot fat-jar is the sole input; JarLauncher is the entry
+      # point that unpacks and boots the nested application jars at runtime.
+      # A .icns icon is attached only when one exists in the repository root.
+      - name: Package with jpackage (macOS → .dmg)
+        if: runner.os == 'macOS'
+        shell: bash
+        run: |
+          mkdir -p jpackage/output
+
+          # Conditionally build the icon argument
+          ICON_ARGS=()
+          if [ -f "icon.icns" ]; then
+            echo "Using icon: icon.icns"
+            ICON_ARGS=(--icon icon.icns)
+          else
+            echo "No .icns icon found – skipping icon argument"
+          fi
+
+          jpackage \
+            --type dmg \
+            --name SavingsTrackerApp \
+            --app-version 1.0.0 \
+            --input      jpackage/input \
+            --dest       jpackage/output \
+            --main-jar   "${{ steps.find-jar-mac.outputs.jar_name }}" \
+            --main-class org.springframework.boot.loader.launch.JarLauncher \
+            --java-options "-Xmx2g" \
+            "${ICON_ARGS[@]}"
+
+      # ── Windows: produce a .exe installer ──────────────────────────────────
+      # --win-console keeps the terminal window open so log output from the
+      # embedded Spring Boot server is visible – useful for a local browser app.
+      # A .ico icon is attached only when one exists in the repository root.
+      - name: Package with jpackage (Windows → .exe)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path "jpackage\output" | Out-Null
+
+          # Build the argument list; icon is added conditionally below
+          $jpackageArgs = @(
+            "--type",        "exe",
+            "--name",        "SavingsTrackerApp",
+            "--app-version", "1.0.0",
+            "--input",       "jpackage\input",
+            "--dest",        "jpackage\output",
+            "--main-jar",    "${{ steps.find-jar-win.outputs.jar_name }}",
+            "--main-class",  "org.springframework.boot.loader.launch.JarLauncher",
+            "--java-options", "-Xmx2g",
+            "--win-console",       # show terminal window (backend / browser app)
+            "--win-dir-chooser",   # let the installer prompt for install location
+            "--win-shortcut"       # add a Start Menu shortcut
+          )
+
+          if (Test-Path "icon.ico") {
+            Write-Host "Using icon: icon.ico"
+            $jpackageArgs += @("--icon", "icon.ico")
+          } else {
+            Write-Host "No .ico icon found – skipping icon argument"
+          }
+
+          jpackage @jpackageArgs
+
+      # ── Upload the platform installer as a downloadable artifact ───────────
+      # Artifacts appear on the workflow run summary page and can be downloaded
+      # directly from GitHub without needing to re-run the workflow.
+      - name: Upload installer artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: SavingsTrackerApp-${{ matrix.platform-label }}
+          path: jpackage/output/*.${{ matrix.artifact-ext }}
+          if-no-files-found: error
+
